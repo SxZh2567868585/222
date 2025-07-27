@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .title {
+            text-align: center;
+            color: #4a4a68;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        .form-label i {
+            margin-right: 0.5rem;
+            color: #764ba2;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #764ba2;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        .input-group {
+            position: relative;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .form-input.error {
+            border-color: #e74c3c;
+        }
+        .form-input.error + .error-message {
+            display: block;
+        }
+        .captcha-group {
+            display: flex;
+            gap: 1rem;
+        }
+        .captcha-input {
+            flex: 1;
+        }
+        .captcha-code {
+            padding: 0.8rem 1rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #4a4a68;
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            cursor: pointer;
+        }
+        .btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        .register-link a {
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+        }
+        .login-method-toggle {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .toggle-option {
+            flex: 1;
+            padding: 0.7rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .toggle-option.active {
+            background: #764ba2;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1 class="title">管理系统</h1>
+        <form id="loginForm">
+            <div class="login-method-toggle">
+                <div class="toggle-option active" data-method="phone">手机号登录</div>
+                <div class="toggle-option" data-method="username">用户名登录</div>
+            </div>
+            <div class="form-group" id="phoneLoginGroup">
+                <label class="form-label">
+                    <i>📱</i>手机号
+                </label>
+                <input type="text" class="form-input" id="phone" placeholder="请输入11位手机号" maxlength="11">
+                <div class="error-message">请输入有效的11位手机号</div>
+            </div>
+            <div class="form-group" id="usernameLoginGroup" style="display: none;">
+                <label class="form-label">
+                    <i>👤</i>用户名
+                </label>
+                <input type="text" class="form-input" id="username" placeholder="请输入用户名" maxlength="20">
+                <div class="error-message">用户名长度不能少于3个字符</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <i>🔒</i>密码
+                </label>
+                <div class="input-group">
+                    <input type="password" class="form-input" id="password" placeholder="6-10位数字字母组合">
+                    <span class="password-toggle" id="passwordToggle">👁️</span>
+                </div>
+                <div class="error-message">密码必须是6-10位数字字母组合</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <i>🔍</i>验证码
+                </label>
+                <div class="captcha-group">
+                    <input type="text" class="form-input captcha-input" id="captcha" placeholder="请输入验证码">
+                    <div class="captcha-code" id="captchaCode">W7THKF</div>
+                </div>
+                <div class="error-message">请输入正确的验证码</div>
+            </div>
+            <button type="submit" class="btn">登录</button>
+            <div class="register-link">
+                还没有账户？ <a href="register.html">立即注册</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // 登录方式切换
+        const toggleOptions = document.querySelectorAll('.toggle-option');
+        const phoneLoginGroup = document.getElementById('phoneLoginGroup');
+        const usernameLoginGroup = document.getElementById('usernameLoginGroup');
+        const phoneInput = document.getElementById('phone');
+        const usernameInput = document.getElementById('username');
+        // 密码验证
+        const passwordInput = document.getElementById('password');
+        // 密码显示切换
+        const passwordToggle = document.getElementById('passwordToggle');
+        // 验证码
+        const captchaInput = document.getElementById('captcha');
+        const captchaCode = document.getElementById('captchaCode');
+        // 表单
+        const loginForm = document.getElementById('loginForm');
+        let currentLoginMethod = 'phone';
+
+        // 手机号验证函数
+        function validatePhone(phone) {
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // 用户名验证函数
+        function validateUsername(username) {
+            return username.trim().length >= 3 && username.trim().length <= 20;
+        }
+
+        // 切换登录方式
+        toggleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除所有active类
+                toggleOptions.forEach(opt => opt.classList.remove('active'));
+                // 给当前点击的选项添加active类
+                option.classList.add('active');
+                // 获取登录方式
+                currentLoginMethod = option.getAttribute('data-method');
+                // 显示对应的登录组
+                if (currentLoginMethod === 'phone') {
+                    phoneLoginGroup.style.display = 'block';
+                    usernameLoginGroup.style.display = 'none';
+                } else {
+                    phoneLoginGroup.style.display = 'none';
+                    usernameLoginGroup.style.display = 'block';
+                }
+                // 清除错误状态
+                phoneInput.classList.remove('error');
+                usernameInput.classList.remove('error');
+            });
+        })
+
+        // 密码验证函数
+        function validatePassword(password) {
+            const passwordRegex = /^[a-zA-Z0-9]{6,10}$/;
+            return passwordRegex.test(password);
+        }
+
+        // 验证码验证
+        function validateCaptcha(input) {
+            return input.toUpperCase() === captchaCode.textContent;
+        }
+
+        // 切换密码可见性
+        passwordToggle.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            passwordToggle.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+
+        // 刷新验证码
+        captchaCode.addEventListener('click', () => {
+            // 生成随机验证码
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let newCode = '';
+            for (let i = 0; i < 6; i++) {
+                newCode += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            captchaCode.textContent = newCode;
+        });
+
+        // 输入验证
+        phoneInput.addEventListener('blur', () => {
+            if (!validatePhone(phoneInput.value)) {
+                phoneInput.classList.add('error');
+            } else {
+                phoneInput.classList.remove('error');
+            }
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (!validatePassword(passwordInput.value)) {
+                passwordInput.classList.add('error');
+            } else {
+                passwordInput.classList.remove('error');
+            }
+        });
+
+        captchaInput.addEventListener('blur', () => {
+            if (!validateCaptcha(captchaInput.value)) {
+                captchaInput.classList.add('error');
+            } else {
+                captchaInput.classList.remove('error');
+            }
+        });
+
+        // 实时清除错误状态
+        phoneInput.addEventListener('input', () => {
+            phoneInput.classList.remove('error');
+        });
+
+        passwordInput.addEventListener('input', () => {
+            passwordInput.classList.remove('error');
+        });
+
+        captchaInput.addEventListener('input', () => {
+            captchaInput.classList.remove('error');
+        });
+
+        // 用户名输入验证事件
+        usernameInput.addEventListener('blur', () => {
+            if (currentLoginMethod === 'username' && !validateUsername(usernameInput.value)) {
+                usernameInput.classList.add('error');
+            } else {
+                usernameInput.classList.remove('error');
+            }
+        });
+
+        usernameInput.addEventListener('input', () => {
+            usernameInput.classList.remove('error');
+        });
+
+        // 表单提交
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let isValid = true;
+
+            // 根据当前登录方式验证
+            if (currentLoginMethod === 'phone') {
+                if (!validatePhone(phoneInput.value)) {
+                    phoneInput.classList.add('error');
+                    isValid = false;
+                }
+            } else {
+                if (!validateUsername(usernameInput.value)) {
+                    usernameInput.classList.add('error');
+                    isValid = false;
+                }
+            }
+
+            // 验证密码
+            if (!validatePassword(passwordInput.value)) {
+                passwordInput.classList.add('error');
+                isValid = false;
+            }
+
+            // 验证验证码
+            if (!validateCaptcha(captchaInput.value)) {
+                captchaInput.classList.add('error');
+                isValid = false;
+            }
+
+            // 如果验证通过，跳转到指定页面
+            if (isValid) {
+                // 检查是否是Admin用户且密码正确
+                if (currentLoginMethod === 'username' && usernameInput.value === 'Admin' && passwordInput.value === 'Admin') {
+                    window.location.href = 'https://hz.haokeyouxuanedu.com/';
+                } else {
+                    window.location.href = 'https://jw27480540-1.fkguest.com/';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
